@@ -333,7 +333,7 @@ footer{border-top:1px solid var(--cc-border);padding:22px 28px;font-family:var(-
       <h4>Privacy</h4>
       <p>No accounts. Your inputs are processed to generate your draft and are not stored on the server. Usage logging is event-level only: which tool ran, how long it took, whether it worked. Never the content. Your drafts and inputs persist in your own browser so a refresh does not eat your work; Start over clears them.</p>
       <h4>Ask about a draft</h4>
-      <p>The Ask panel answers only from the draft on your screen. If the answer is not in the material, it says so. It is permitted to disagree with your premise. It never writes anything addressed to students.</p>
+      <p>The Ask panel starts from the draft on your screen and reports its contents honestly; ask how to adapt or extend it and it can offer practical suggestions, saying plainly when it goes beyond the draft. It is permitted to disagree with your premise. It never writes anything addressed to students.</p>
     </div>
   </div>
 </div>
@@ -397,10 +397,23 @@ function runLoader(view,messages,work){
         .catch(function(ex){
           clearInterval(t);loader.classList.remove('active');
           boxes.forEach(function(b){b.style.display='';});
-          showError(view, ex.friendly?ex.message:'The draft could not be generated this time. Your inputs are untouched; try again.');
+          showError(view, ex.friendly?ex.message:'The draft could not be generated this time. Your inputs are untouched; try again.',
+            function(){runLoader(view,messages,work);});
         });
 }
-function showError(view,msg){ var e=$('.errbar',view); e.textContent=msg; e.classList.add('active'); setTimeout(function(){e.classList.remove('active');},9000); }
+function showError(view,msg,retry){
+  var e=$('.errbar',view); e.innerHTML='';
+  e.appendChild(document.createTextNode(msg+' '));
+  if(retry){
+    var b=el('button','btn-ghost','Try again now');b.type='button';
+    b.style.padding='2px 4px';b.style.fontSize='0.68rem';
+    b.addEventListener('click',function(){e.classList.remove('active');retry();});
+    e.appendChild(b);
+  }
+  e.classList.add('active');
+  clearTimeout(e._hideT);
+  e._hideT=setTimeout(function(){e.classList.remove('active');},15000);
+}
 function copyText(t,btn){
   var done=function(){ var old=btn.textContent;btn.textContent='Copied';setTimeout(function(){btn.textContent=old;},1400); };
   if(navigator.clipboard){ navigator.clipboard.writeText(t).then(done,done); }
@@ -440,14 +453,16 @@ function askPanel(view,tool,getArtifact){
   var inp=el('input','field');inp.type='text';inp.placeholder='e.g. Which piece needs my judgment most?';
   var btn=el('button','btn-primary','Ask');btn.type='button';
   var ans=el('div','answer');
-  var small=el('small',null,'Answers come only from the draft above. If it is not in the material, it will say so, and it is allowed to disagree with you. It never writes anything addressed to students. Nothing you type here is stored.');
+  var small=el('small',null,'Answers start from the draft above and report what is in it honestly. Ask how to adapt or extend it and you will get practical suggestions, marked as going beyond the draft. It is allowed to disagree with you. It never writes anything addressed to students. Nothing you type here is stored.');
   btn.addEventListener('click',function(){
     var q=inp.value.trim();
     if(!q){ans.classList.add('active');ans.textContent='Type a question about the draft first.';return;}
-    btn.disabled=true;ans.classList.add('active');ans.textContent='Thinking it over.';
+    btn.disabled=true;ans.classList.add('active');
+    var dots=0;ans.textContent='Thinking it over';
+    var tick=setInterval(function(){dots=(dots+1)%4;ans.textContent='Thinking it over'+Array(dots+1).join('.');},450);
     api('ask',tool,{question:q,artifact:getArtifact()})
-      .then(function(d){ans.textContent=d.answer;btn.disabled=false;})
-      .catch(function(ex){ans.textContent=ex.friendly?ex.message:'That question could not be answered this time. Try again.';btn.disabled=false;});
+      .then(function(d){clearInterval(tick);ans.textContent=d.answer;btn.disabled=false;})
+      .catch(function(ex){clearInterval(tick);ans.textContent=ex.friendly?ex.message:'That question could not be answered this time. Try again.';btn.disabled=false;});
   });
   row.appendChild(inp);row.appendChild(btn);
   wrap.appendChild(lab);wrap.appendChild(row);wrap.appendChild(ans);wrap.appendChild(small);
@@ -499,6 +514,11 @@ function stageTo(sh,which){
   sh.options.style.display=(which==='options')?'':'none';
   sh.artifact.classList.toggle('active',which==='artifact');
   sh.artifact.style.display=(which==='artifact')?'':'none';
+}
+function backBtn2(label,fn){
+  var b=el('button','btn-ghost',label);b.type='button';
+  b.addEventListener('click',fn);
+  return b;
 }
 function startOverBtn(tool,fn){
   var b=el('button','btn-ghost','Start over');b.type='button';
@@ -603,6 +623,7 @@ var FE={}; // front-end tool registry: FE[tool] = {open}
     var box=sh.options;box.innerHTML='';
     box.appendChild(el('span','draft-tag','Drafted options: choose one door per column'));
     var oh=el('div','out-head');oh.appendChild(el('h3',null,st.options.lessonTitle));
+    oh.appendChild(backBtn2('\u2190 Edit inputs',function(){renderIntake();}));
     oh.appendChild(startOverBtn(TOOL,function(){st=fresh();renderIntake();}));
     box.appendChild(oh);
     box.appendChild(el('p','out-sub',st.options.objectiveSummary));
@@ -664,7 +685,7 @@ var FE={}; // front-end tool registry: FE[tool] = {open}
   function renderArtifact(){
     st.stage='artifact';stageTo(sh,'artifact');
     var a=st.artifact,box=sh.artifact;box.innerHTML='';
-    var oh=el('div','out-head');oh.appendChild(el('span'));
+    var oh=el('div','out-head');oh.appendChild(backBtn2('\u2190 Back to the options',function(){renderOptions();}));
     oh.appendChild(startOverBtn(TOOL,function(){st=fresh();renderIntake();}));
     box.appendChild(oh);
     var sections=[];
@@ -732,6 +753,7 @@ var FE={}; // front-end tool registry: FE[tool] = {open}
     var box=sh.options;box.innerHTML='';
     box.appendChild(el('span','draft-tag','Drafted web: choose one to three nodes for the chase'));
     var oh=el('div','out-head');oh.appendChild(el('h3',null,st.options.inquiryTitle));
+    oh.appendChild(backBtn2('\u2190 Edit inputs',function(){renderIntake();}));
     oh.appendChild(startOverBtn(TOOL,function(){st=fresh();renderIntake();}));
     box.appendChild(oh);
     box.appendChild(el('p','out-sub',st.options.refinedQuestion));
@@ -743,7 +765,7 @@ var FE={}; // front-end tool registry: FE[tool] = {open}
     svg.setAttribute('aria-label','Inquiry web with selectable sub-question nodes');
     panel.appendChild(svg);
     var detail=el('div','node-detail');
-    detail.appendChild(el('h4',null,'Tap a node to read it. Tap again to choose it for the chase.'));
+    detail.appendChild(el('h4',null,'Tap a node to read it, then choose it for the chase.'));
     detail.appendChild(el('p',null,'Each node is one sub-question the student can investigate. Choose one to three; the pathway plan is written around your choices.'));
     wrap.appendChild(panel);wrap.appendChild(detail);
     box.appendChild(wrap);
@@ -772,25 +794,28 @@ var FE={}; // front-end tool registry: FE[tool] = {open}
       svg.appendChild(g);return g;
     }
     mkNode(cx,cy,62,st.options.inquiryTitle.length<16?st.options.inquiryTitle:'The question','center',10,null);
-    var lastRead=null;
     nodes.forEach(function(n,i){
-      var g=mkNode(pts[i].x,pts[i].y,52,n.label,st.selIds.indexOf(n.id)>=0?'sel':'',14,function(){
-        if(lastRead===n.id){ // second tap toggles selection
-          var at=st.selIds.indexOf(n.id);
-          if(at>=0){st.selIds.splice(at,1);g.classList.remove('sel');}
-          else if(st.selIds.length<3){st.selIds.push(n.id);g.classList.add('sel');}
-          save();updBar();
-        }
-        lastRead=n.id;
-        detail.innerHTML='';
-        detail.appendChild(el('h4',null,n.label));
-        detail.appendChild(el('span','mono-label','What the student does'));
-        detail.appendChild(el('p',null,n.student));
-        detail.appendChild(el('span','mono-label','The teacher move'));
-        detail.appendChild(el('p',null,n.teacher));
-        detail.appendChild(el('p','step-help',st.selIds.indexOf(n.id)>=0?'Chosen for the chase. Tap again to remove.':'Tap the node again to choose it for the chase.'));
-      });
+      var g=mkNode(pts[i].x,pts[i].y,52,n.label,st.selIds.indexOf(n.id)>=0?'sel':'',14,function(){showNode(n,g);});
     });
+    function showNode(n,g){
+      detail.innerHTML='';
+      detail.appendChild(el('h4',null,n.label));
+      detail.appendChild(el('span','mono-label','What the student does'));
+      detail.appendChild(el('p',null,n.student));
+      detail.appendChild(el('span','mono-label','The teacher move'));
+      detail.appendChild(el('p',null,n.teacher));
+      var chosen=st.selIds.indexOf(n.id)>=0;
+      var b=el('button','btn-primary',chosen?'Remove from the chase':'Choose for the chase');
+      b.type='button';b.style.marginTop='6px';
+      b.addEventListener('click',function(){
+        var at=st.selIds.indexOf(n.id);
+        if(at>=0){st.selIds.splice(at,1);g.classList.remove('sel');}
+        else if(st.selIds.length<3){st.selIds.push(n.id);g.classList.add('sel');}
+        else{picks.textContent='Three nodes is the limit. Remove one to swap.';return;}
+        save();updBar();showNode(n,g);
+      });
+      detail.appendChild(b);
+    }
     var bar=el('div','commitbar');
     var picks=el('span','picks');
     var go=el('button','btn-yellow','Build the pathway plan');go.type='button';
@@ -828,7 +853,7 @@ var FE={}; // front-end tool registry: FE[tool] = {open}
   function renderArtifact(){
     st.stage='artifact';stageTo(sh,'artifact');
     var a=st.artifact,box=sh.artifact;box.innerHTML='';
-    var oh=el('div','out-head');oh.appendChild(el('span'));
+    var oh=el('div','out-head');oh.appendChild(backBtn2('\u2190 Back to the options',function(){renderOptions();}));
     oh.appendChild(startOverBtn(TOOL,function(){st=fresh();renderIntake();}));
     box.appendChild(oh);
     var sections=[{h:'The chase',t:a.chosenNodes.join(' \u00b7 ')}];
@@ -904,6 +929,7 @@ var FE={}; // front-end tool registry: FE[tool] = {open}
     box.appendChild(el('span','draft-tag','Drafted bridges: choose the one that holds'));
     var oh=el('div','out-head');
     oh.appendChild(el('h3',null,st.intake.subjectA+' \u00d7 '+st.intake.subjectB));
+    oh.appendChild(backBtn2('\u2190 Edit inputs',function(){renderIntake();}));
     oh.appendChild(startOverBtn(TOOL,function(){st=fresh();renderIntake();}));
     box.appendChild(oh);
     box.appendChild(el('p','out-sub','A bridge holds if the lesson collapses when either subject is removed.'));
@@ -947,7 +973,7 @@ var FE={}; // front-end tool registry: FE[tool] = {open}
   function renderArtifact(){
     st.stage='artifact';stageTo(sh,'artifact');
     var a=st.artifact,box=sh.artifact;box.innerHTML='';
-    var oh=el('div','out-head');oh.appendChild(el('span'));
+    var oh=el('div','out-head');oh.appendChild(backBtn2('\u2190 Back to the options',function(){renderOptions();}));
     oh.appendChild(startOverBtn(TOOL,function(){st=fresh();renderIntake();}));
     box.appendChild(oh);
     var sections=[
@@ -1019,6 +1045,7 @@ var FE={}; // front-end tool registry: FE[tool] = {open}
     var box=sh.options;box.innerHTML='';
     box.appendChild(el('span','draft-tag','Drafted applications: choose one to three that are real for your students'));
     var oh=el('div','out-head');oh.appendChild(el('h3',null,'Where the standard lives'));
+    oh.appendChild(backBtn2('\u2190 Edit inputs',function(){renderIntake();}));
     oh.appendChild(startOverBtn(TOOL,function(){st=fresh();renderIntake();}));
     box.appendChild(oh);
     box.appendChild(el('p','out-sub','You know which of these your students would recognize from their own lives. Choose those.'));
@@ -1082,7 +1109,7 @@ var FE={}; // front-end tool registry: FE[tool] = {open}
   function renderArtifact(){
     st.stage='artifact';stageTo(sh,'artifact');
     var a=st.artifact,box=sh.artifact;box.innerHTML='';
-    var oh=el('div','out-head');oh.appendChild(el('span'));
+    var oh=el('div','out-head');oh.appendChild(backBtn2('\u2190 Back to the options',function(){renderOptions();}));
     oh.appendChild(startOverBtn(TOOL,function(){st=fresh();renderIntake();}));
     box.appendChild(oh);
     var sections=[{h:'Applications used',t:a.applicationsUsed.join(' \u00b7 ')}];
@@ -1129,16 +1156,16 @@ var DEMO_PAYLOADS = {
   },
   wonder: {
     options: {"inquiryTitle":"The Purr Investigation","refinedQuestion":"What is a purr for, and how would we find out?","nodes":[
-      {"id":"n1","label":"How is the sound made?","student":"Finds and compares two explanations of the purr mechanism, then builds a paper model of the vibration.","teacher":"Ask her to point to where the two explanations disagree. The disagreement is the lesson."},
+      {"id":"n1","label":"How is the sound made?","student":"Finds and compares two explanations of the purr mechanism, then builds a paper model of the vibration.","teacher":"Ask them to point to where the two explanations disagree. The disagreement is the lesson."},
       {"id":"n2","label":"Do big cats purr?","student":"Sorts the cat family into purrers and roarers, then hunts for the rule behind the split.","teacher":"Do not confirm the rule. Ask what evidence would settle it."},
       {"id":"n3","label":"Do cats purr when hurt?","student":"Collects three sources on purring outside of contentment and rates how much each one can be trusted.","teacher":"This is the source-evaluation checkpoint. Who wrote it, and how do they know?"},
       {"id":"n4","label":"What does a purr do to us?","student":"Designs a one-question survey for cat owners and predicts the result before running it.","teacher":"Prediction before data. That is the habit being built."},
       {"id":"n5","label":"Can we measure a purr?","student":"Records a purr with a free spectrogram app and reads the frequency off the screen.","teacher":"Real measurement, real units. Connect it back to the mechanism node."},
       {"id":"n6","label":"How would a vet explain it?","student":"Writes three interview questions a veterinarian could answer that a website could not.","teacher":"The skill is asking questions only an expert can answer. Screen the three together."}]},
     commit: {"planTitle":"The Purr Investigation: Pathway Plan","refinedQuestion":"What is a purr for, and how would we find out?","chosenNodes":["Do big cats purr?","Can we measure a purr?"],"phases":[
-      {"name":"Wonder","days":"Days 1 to 2","studentWork":"The student maps what she already believes about purring and marks every belief she cannot yet defend. She writes her two chase questions in her own words and predicts what she expects to find.","teacherMoves":"Collect the predictions without commenting on their accuracy. The point is that they exist before the evidence does.","checkpoint":"A written prediction for each chase question, dated."},
-      {"name":"Chase","days":"Days 3 to 8","studentWork":"She pursues both nodes with sources she has rated for trust: sorting the cat family and hunting the rule for one, recording and reading a spectrogram for the other. Findings and dead ends both go in the log.","teacherMoves":"Check reasoning, never conclusions. When she asks whether she is right, ask what evidence would settle it and whether she has it yet.","checkpoint":"A source log with trust ratings and at least one dead end recorded honestly."},
-      {"name":"Show","days":"Days 9 to 10","studentWork":"She teaches one finding to the class and names one question she still cannot answer, with what it would take to answer it.","teacherMoves":"Protect the open question from classmates who want to close it with a quick search. The unanswered question is the grade, not a failure.","checkpoint":"The share-out happens with the open question stated out loud."}],
+      {"name":"Wonder","days":"Days 1 to 2","studentWork":"The student maps what they already believe about purring and marks every belief they cannot yet defend. They write their two chase questions in their own words and predict what they expect to find.","teacherMoves":"Collect the predictions without commenting on their accuracy. The point is that they exist before the evidence does.","checkpoint":"A written prediction for each chase question, dated."},
+      {"name":"Chase","days":"Days 3 to 8","studentWork":"They pursue both nodes with sources they have rated for trust: sorting the cat family and hunting the rule for one, recording and reading a spectrogram for the other. Findings and dead ends both go in the log.","teacherMoves":"Check reasoning, never conclusions. When they ask whether they are right, ask what evidence would settle it and whether they have it yet.","checkpoint":"A source log with trust ratings and at least one dead end recorded honestly."},
+      {"name":"Show","days":"Days 9 to 10","studentWork":"They teach one finding to the class and name one question they still cannot answer, with what it would take to answer it.","teacherMoves":"Protect the open question from classmates who want to close it with a quick search. The unanswered question is the grade, not a failure.","checkpoint":"The share-out happens with the open question stated out loud."}],
       "sourceGuidance":"For this grade band: who wrote it, how do they know, and would a second source say the same thing. Three checks, every source, no exceptions.","shareOut":"Ends with an open question on the wall, not a closed poster.","openQuestionPrompt":"What is one thing about purring you still cannot answer, and what would it take to find out?"},
     ask: {"answer":"The plan holds the two chosen nodes but leans on the spectrogram app being available; that is the piece that needs your check before day three. If devices are short, the measurement node can run as a whole-class station while the sorting node stays individual. The checkpoint structure does not change."}
   },
