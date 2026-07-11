@@ -424,8 +424,7 @@ function printText(t,title){
   w.document.write('<title>'+title.replace(/</g,'&lt;')+'</title><pre style="font-family:Georgia,serif;font-size:14px;white-space:pre-wrap;max-width:660px;margin:40px auto;line-height:1.6;">'+t.replace(/&/g,'&amp;').replace(/</g,'&lt;')+'</pre>');
   w.document.close();w.print();
 }
-function docRender(host,title,sub,sections,serialized){
-  host.innerHTML='';
+function docRender(host,title,sub,sections,serialized,onReset){
   var d=el('div','doc');
   d.appendChild(el('span','draft-tag','Draft for your adaptation'));
   d.appendChild(el('h3',null,title));
@@ -443,6 +442,11 @@ function docRender(host,title,sub,sections,serialized){
   var p=el('button','btn-ghost','Print draft');p.type='button';
   p.addEventListener('click',function(){printText(serialized,title);});
   acts.appendChild(c);acts.appendChild(p);
+  if(onReset){
+    var r=el('button','btn-ghost','Start a new draft');r.type='button';
+    r.addEventListener('click',onReset);
+    acts.appendChild(r);
+  }
   d.appendChild(acts);
   host.appendChild(d);
 }
@@ -697,7 +701,7 @@ var FE={}; // front-end tool registry: FE[tool] = {open}
     sections.push({h:'Assessment anchor',t:a.assessmentAnchor});
     sections.push({h:'Timing',t:a.timing});
     sections.push({h:'Where your judgment is needed',t:a.adaptationNotes});
-    docRender(box,a.menuTitle,a.objectiveSummary,sections,serialize(a));
+    docRender(box,a.menuTitle,a.objectiveSummary,sections,serialize(a),function(){clearState(TOOL);st=fresh();renderIntake();});
     box.appendChild(askPanel(sh.view,TOOL,function(){return st.artifact;}));
   }
 
@@ -864,7 +868,7 @@ var FE={}; // front-end tool registry: FE[tool] = {open}
     sections.push({h:'Source guidance',t:a.sourceGuidance});
     sections.push({h:'Share-out',t:a.shareOut});
     sections.push({h:'Open question prompt (adapt before use)',t:a.openQuestionPrompt,well:true});
-    docRender(box,a.planTitle,a.refinedQuestion,sections,serialize(a));
+    docRender(box,a.planTitle,a.refinedQuestion,sections,serialize(a),function(){clearState(TOOL);st=fresh();renderIntake();});
     box.appendChild(askPanel(sh.view,TOOL,function(){return st.artifact;}));
   }
   function save(){saveState(TOOL,st);}
@@ -987,7 +991,7 @@ var FE={}; // front-end tool registry: FE[tool] = {open}
       {h:'Assessment',t:a.assessment},
       {h:'Materials and timing',t:a.materials+'\n'+a.timing}
     ];
-    docRender(box,a.lessonTitle,a.objective,sections,serialize(a));
+    docRender(box,a.lessonTitle,a.objective,sections,serialize(a),function(){clearState(TOOL);st=fresh();renderIntake();});
     box.appendChild(askPanel(sh.view,TOOL,function(){return st.artifact;}));
   }
   function save(){saveState(TOOL,st);}
@@ -1120,7 +1124,7 @@ var FE={}; // front-end tool registry: FE[tool] = {open}
     sections.push({h:'Partner outreach \u00b7 '+a.partnerOutreach.who+' (adapt before sending)',t:a.partnerOutreach.draftNote,well:true});
     sections.push({h:'Assessment',t:a.assessment});
     sections.push({h:'Timing',t:a.timing});
-    docRender(box,a.unitTitle,a.standard,sections,serialize(a));
+    docRender(box,a.unitTitle,a.standard,sections,serialize(a),function(){clearState(TOOL);st=fresh();renderIntake();});
     box.appendChild(askPanel(sh.view,TOOL,function(){return st.artifact;}));
   }
   function save(){saveState(TOOL,st);}
