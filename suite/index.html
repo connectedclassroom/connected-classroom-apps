@@ -23,6 +23,7 @@
   --mono:'IBM Plex Mono','Courier New',monospace;
 }
 *{box-sizing:border-box;}
+html{font-size:18px;}
 body{margin:0;font-family:var(--sans);font-size:1rem;line-height:1.7;color:var(--cc-body);background:var(--cc-light);-webkit-tap-highlight-color:transparent;}
 button{touch-action:manipulation;}
 :focus-visible{outline:2px solid var(--cc-yellow);outline-offset:2px;}
@@ -158,8 +159,8 @@ textarea.field:focus,input.field:focus{outline:none;border-color:var(--cc-navy);
 .node{cursor:pointer;}
 .node circle{fill:#fff;stroke:var(--cat-blue);stroke-width:2;}
 .node.center circle{fill:var(--cc-navy);stroke:var(--cc-navy);}
-.node text{font-family:var(--sans);font-size:12.5px;fill:var(--cc-dark);}
-.node.center text{fill:#fff;font-family:var(--serif);font-size:15px;}
+.node text{font-family:var(--sans);font-size:14.5px;fill:var(--cc-dark);}
+.node.center text{fill:#fff;font-family:var(--serif);font-size:17px;}
 .node:hover circle{fill:var(--cat-blue-t);}
 .node.sel circle{fill:var(--cat-blue);stroke:var(--cc-navy);stroke-width:3;}
 .node.sel text{fill:#fff;}
@@ -199,6 +200,56 @@ textarea.field:focus,input.field:focus{outline:none;border-color:var(--cc-navy);
 .ask .answer{display:none;background:var(--cc-light);border:1px solid var(--cc-border);padding:14px 16px;margin-top:12px;font-size:0.92rem;}
 .ask .answer.active{display:block;}
 .ask small{display:block;color:var(--cc-muted);font-size:0.78rem;margin-top:10px;}
+
+/* in-place editing (School Lens pattern) */
+[contenteditable="true"]{border-bottom:1px dashed transparent;}
+[contenteditable="true"]:hover{border-bottom-color:var(--cc-border);}
+[contenteditable="true"]:focus{outline:none;background:#FFFBEB;border-bottom-color:var(--cc-yellow);}
+.edit-hint{display:block;font-family:var(--mono);font-size:0.6rem;font-weight:600;
+  text-transform:uppercase;letter-spacing:0.08em;color:var(--cc-muted);margin:0 0 14px;}
+
+/* backpack (ported from School Lens) */
+.backpack-toggle{position:fixed;top:50%;right:0;transform:translateY(-50%);
+  background:var(--cc-navy);color:#fff;border:0;padding:14px 9px;
+  border-radius:var(--radius) 0 0 var(--radius);cursor:pointer;z-index:60;
+  display:flex;flex-direction:column;align-items:center;gap:6px;
+  font-family:var(--mono);font-size:0.6rem;font-weight:600;text-transform:uppercase;
+  letter-spacing:0.08em;box-shadow:var(--shadow-md);}
+.backpack-toggle:hover{background:var(--cc-navy-hover);}
+.backpack-toggle .bp-count{background:var(--cc-yellow);color:var(--cc-navy);
+  border-radius:9px;padding:1px 7px;font-weight:600;}
+.backpack{position:fixed;top:0;right:-480px;width:460px;max-width:100vw;height:100vh;
+  background:#fff;box-shadow:-4px 0 20px rgba(0,0,0,0.15);z-index:70;
+  transition:right .25s ease;display:flex;flex-direction:column;}
+.backpack.open{right:0;}
+.bp-head{display:flex;justify-content:space-between;align-items:center;
+  padding:16px 18px;background:var(--cc-navy);color:#fff;flex:0 0 auto;}
+.bp-head h3{color:#fff;font-size:1.25rem;}
+.bp-close{background:transparent;border:0;color:#fff;font-size:1.05rem;cursor:pointer;padding:4px 8px;}
+.bp-body{flex:1 1 auto;overflow-y:auto;padding:14px 16px;}
+.bp-empty{font-size:0.9rem;color:var(--cc-muted);padding:8px 2px;}
+.bp-item{border:1px solid var(--cc-border);border-left:4px solid var(--cc-navy);
+  padding:12px 14px;margin-bottom:10px;background:#fff;}
+.bp-item-title{font-weight:700;color:var(--cc-dark);font-size:0.95rem;}
+.bp-item-meta{font-family:var(--mono);font-size:0.58rem;letter-spacing:0.08em;
+  text-transform:uppercase;color:var(--cc-muted);margin:3px 0 8px;}
+.bp-item-actions{display:flex;gap:6px;flex-wrap:wrap;}
+.bp-btn{font-family:var(--mono);font-size:0.58rem;font-weight:600;letter-spacing:0.06em;
+  text-transform:uppercase;border:1px solid var(--cc-border);background:var(--cc-light);
+  color:var(--cc-navy);border-radius:var(--radius);padding:6px 9px;cursor:pointer;}
+.bp-btn:hover{border-color:var(--cc-navy);}
+.bp-btn.danger{color:#a03c32;}
+.bp-detail{display:none;margin-top:10px;font-size:0.85rem;color:var(--cc-body);
+  white-space:pre-wrap;border-top:1px solid var(--cc-border);padding-top:10px;
+  max-height:320px;overflow:auto;}
+.bp-detail.show{display:block;}
+.bp-foot{padding:12px 16px;border-top:1px solid var(--cc-border);display:flex;gap:8px;flex:0 0 auto;}
+
+/* ask thread */
+.ask-thread{display:flex;flex-direction:column;gap:10px;margin-top:12px;}
+.ask-q{font-size:0.9rem;font-weight:700;color:var(--cc-navy);}
+.ask-a{background:var(--cc-light);border:1px solid var(--cc-border);padding:12px 14px;font-size:0.92rem;}
+.ask-tools{display:flex;justify-content:flex-end;margin-top:8px;}
 
 /* modal */
 .overlay{display:none;position:fixed;inset:0;background:rgba(13,17,23,0.55);z-index:40;align-items:flex-start;justify-content:center;padding:5vh 16px;overflow-y:auto;}
@@ -321,6 +372,23 @@ footer{border-top:1px solid var(--cc-border);padding:22px 28px;font-family:var(-
 
 </main>
 
+<!-- ========== BACKPACK ========== -->
+<button class="backpack-toggle" id="bpToggle" type="button" aria-label="Open your backpack">
+  <span class="bp-count" id="bpCount">0</span>
+  <span>Backpack</span>
+</button>
+<div class="backpack" id="backpack" role="dialog" aria-label="Your backpack">
+  <div class="bp-head"><h3>Your Backpack</h3><button class="bp-close" id="bpClose" type="button" aria-label="Close">&#10005;</button></div>
+  <div class="bp-body">
+    <div class="bp-empty" id="bpEmpty">Nothing saved yet. Generate a draft, edit it if you like, then Save to Backpack. It stays in this browser until you remove it.</div>
+    <div id="bpItems"></div>
+  </div>
+  <div class="bp-foot">
+    <button class="btn-primary" id="bpCopyAll" type="button">Copy all (formatted)</button>
+    <button class="btn-ghost" id="bpClear" type="button">Clear</button>
+  </div>
+</div>
+
 <!-- ========== HOW THIS WORKS ========== -->
 <div class="overlay" id="archOverlay">
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="archTitle">
@@ -331,9 +399,9 @@ footer{border-top:1px solid var(--cc-border);padding:22px 28px;font-family:var(-
       <h4>Where things run</h4>
       <p>This page is a static site. When you generate, your inputs travel to a private backend that holds the AI key and calls the model (currently <code>Gemini</code>, named here and nowhere else; the model behind the suite can change without the suite changing). Responses are checked against a strict structure before you ever see them; a malformed draft is rejected, not displayed.</p>
       <h4>Privacy</h4>
-      <p>No accounts. Your inputs are processed to generate your draft and are not stored on the server. Usage logging is event-level only: which tool ran, how long it took, whether it worked. Never the content. Your drafts and inputs persist in your own browser so a refresh does not eat your work; Start over clears them.</p>
+      <p>No accounts. Your inputs are processed to generate your draft and are not stored on the server. Usage logging is event-level only: which tool ran, how long it took, whether it worked. Never the content. Your drafts, your edits to them, your follow-up conversation, and your Backpack all live in your own browser only; a refresh does not eat your work, Start over clears the current draft, and the Backpack keeps what you save until you remove it.</p>
       <h4>Ask about a draft</h4>
-      <p>The Ask panel starts from the draft on your screen and reports its contents honestly; ask how to adapt or extend it and it can offer practical suggestions, saying plainly when it goes beyond the draft. It is permitted to disagree with your premise. It never writes anything addressed to students.</p>
+      <p>The Ask panel is a running conversation about the draft on your screen: follow-up questions remember the exchange so far. It reports the draft's contents honestly; ask how to adapt or extend it and it can offer practical suggestions, saying plainly when it goes beyond the draft. It is permitted to disagree with your premise. It never writes anything addressed to students.</p>
     </div>
   </div>
 </div>
@@ -414,66 +482,252 @@ function showError(view,msg,retry){
   clearTimeout(e._hideT);
   e._hideT=setTimeout(function(){e.classList.remove('active');},15000);
 }
-function copyText(t,btn){
-  var done=function(){ var old=btn.textContent;btn.textContent='Copied';setTimeout(function(){btn.textContent=old;},1400); };
-  if(navigator.clipboard){ navigator.clipboard.writeText(t).then(done,done); }
-  else{ var ta=document.createElement('textarea');ta.value=t;document.body.appendChild(ta);ta.select();try{document.execCommand('copy');}catch(e){} ta.remove();done(); }
+function escapeHtml(x){return String(x==null?'':x).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function txt(e){return e?(e.textContent||'').trim():'';}
+function flash(btn,label){if(!btn){return;}var o=btn.textContent;btn.textContent=label;setTimeout(function(){btn.textContent=o;},1400);}
+
+// ---- rich copy: text/html + text/plain (ported from School Lens) ----
+function copyRich(html,plain,btn){
+  function ok(){flash(btn,'Copied \u2713');}
+  try{
+    if(window.ClipboardItem&&navigator.clipboard&&navigator.clipboard.write){
+      var item=new ClipboardItem({
+        'text/html':new Blob([html],{type:'text/html'}),
+        'text/plain':new Blob([plain],{type:'text/plain'})
+      });
+      navigator.clipboard.write([item]).then(ok,function(){copyRichFallback(html,plain,ok);});
+      return;
+    }
+  }catch(e){}
+  copyRichFallback(html,plain,ok);
 }
-function printText(t,title){
+function copyRichFallback(html,plain,ok){
+  try{
+    var div=document.createElement('div');
+    div.style.position='fixed';div.style.left='-9999px';div.style.top='0';
+    div.innerHTML=html;
+    document.body.appendChild(div);
+    var range=document.createRange();range.selectNodeContents(div);
+    var sel=window.getSelection();sel.removeAllRanges();sel.addRange(range);
+    document.execCommand('copy');
+    sel.removeAllRanges();document.body.removeChild(div);
+    ok();
+  }catch(e){
+    try{
+      var ta=document.createElement('textarea');
+      ta.value=plain;document.body.appendChild(ta);ta.select();
+      document.execCommand('copy');document.body.removeChild(ta);ok();
+    }catch(e2){}
+  }
+}
+
+// ---- view helpers: one structure feeds copy, print, and the backpack ----
+function richHtmlFromView(v,toolTitle){
+  var st={
+    h2:'font-family:Georgia,serif;font-weight:400;color:#0D1117;font-size:24px;margin:0 0 4px 0;',
+    sub:'font-family:Arial,sans-serif;font-size:14px;color:#666;font-style:italic;margin:0 0 12px 0;',
+    label:'font-family:Courier New,monospace;font-size:11px;font-weight:bold;letter-spacing:1px;color:#1F3B61;text-transform:uppercase;margin:14px 0 4px 0;',
+    p:'font-family:Arial,sans-serif;font-size:14px;color:#333;line-height:1.6;margin:0 0 8px 0;',
+    well:'font-family:Arial,sans-serif;font-size:14px;color:#333;line-height:1.6;border-left:3px solid #FFC800;background:#F8F9FA;padding:8px 12px;margin:0 0 8px 0;'
+  };
+  var h='<div style="border-left:4px solid #FFC800;padding-left:14px;">';
+  if(toolTitle){h+='<p style="'+st.label+'">'+escapeHtml(toolTitle)+' \u00b7 draft for your adaptation</p>';}
+  h+='<h2 style="'+st.h2+'">'+escapeHtml(v.title)+'</h2>';
+  if(v.sub){h+='<p style="'+st.sub+'">'+escapeHtml(v.sub)+'</p>';}
+  v.sections.forEach(function(sec){
+    h+='<p style="'+st.label+'">'+escapeHtml(sec.h)+'</p>';
+    String(sec.t).split('\n').forEach(function(par){
+      if(par.trim()){h+='<p style="'+(sec.well?st.well:st.p)+'">'+escapeHtml(par)+'</p>';}
+    });
+  });
+  h+='<p style="'+st.p+'color:#999;font-size:11px;">Draft from the Intelligence Suite \u00b7 Connected Classroom \u00b7 adapt before classroom use.</p>';
+  h+='</div>';
+  return h;
+}
+function plainFromView(v){
+  var out=[v.title];
+  if(v.sub){out.push(v.sub);}
+  out.push('');
+  v.sections.forEach(function(sec){
+    out.push(sec.h.toUpperCase());
+    out.push(sec.t);
+    out.push('');
+  });
+  out.push('(Draft from the Intelligence Suite; adapt before classroom use.)');
+  return out.join('\n');
+}
+function printFormatted(v,toolTitle){
   var w=window.open('','_blank');
-  w.document.write('<title>'+title.replace(/</g,'&lt;')+'</title><pre style="font-family:Georgia,serif;font-size:14px;white-space:pre-wrap;max-width:660px;margin:40px auto;line-height:1.6;">'+t.replace(/&/g,'&amp;').replace(/</g,'&lt;')+'</pre>');
-  w.document.close();w.print();
+  w.document.write('<!DOCTYPE html><html><head><title>'+escapeHtml(v.title)+
+    '</title><style>body{max-width:680px;margin:36px auto;padding:0 20px;}</style></head><body>'+
+    richHtmlFromView(v,toolTitle)+'</body></html>');
+  w.document.close();
+  setTimeout(function(){w.print();},250);
 }
-function docRender(host,title,sub,sections,serialized,onReset){
+
+// ---- the editable document renderer ----
+function docRender(host,tool,toolTitle,view,hooks){
   var d=el('div','doc');
   d.appendChild(el('span','draft-tag','Draft for your adaptation'));
-  d.appendChild(el('h3',null,title));
-  if(sub){ d.appendChild(el('p','doc-sub',sub)); }
-  sections.forEach(function(s){
-    var sec=el('section');
-    sec.appendChild(el('h4',null,s.h));
-    if(s.well){ var q=el('p','quotewell',s.t); sec.appendChild(q); }
-    else{ String(s.t).split('\n').forEach(function(par){ if(par.trim())sec.appendChild(el('p',null,par)); }); }
-    d.appendChild(sec);
+  d.appendChild(el('span','edit-hint','Every block below is editable. Tap any text to rework it; edits save on this device.'));
+  var h=el('h3');h.contentEditable='true';h.spellcheck=false;h.setAttribute('data-doc','title');h.textContent=view.title;
+  d.appendChild(h);
+  var subEl=null;
+  if(view.sub){
+    subEl=el('p','doc-sub');subEl.contentEditable='true';subEl.spellcheck=false;
+    subEl.setAttribute('data-doc','sub');subEl.textContent=view.sub;
+    d.appendChild(subEl);
+  }
+  view.sections.forEach(function(sec){
+    var secEl=el('section');secEl.setAttribute('data-doc','section');
+    var hh=el('h4');hh.contentEditable='true';hh.spellcheck=false;hh.setAttribute('data-doc','h');hh.textContent=sec.h;
+    secEl.appendChild(hh);
+    var body=el('div',sec.well?'quotewell':null);
+    body.contentEditable='true';body.spellcheck=false;body.setAttribute('data-doc','t');
+    if(sec.well){body.setAttribute('data-well','1');}
+    body.style.whiteSpace='pre-wrap';
+    if(!sec.well){body.style.fontSize='0.96rem';body.style.marginBottom='10px';}
+    body.textContent=sec.t;
+    secEl.appendChild(body);
+    d.appendChild(secEl);
+  });
+  function harvest(){
+    var v={title:txt(h),sub:subEl?txt(subEl):'',sections:[]};
+    d.querySelectorAll('[data-doc="section"]').forEach(function(secEl){
+      var bodyEl=secEl.querySelector('[data-doc="t"]');
+      v.sections.push({
+        h:txt(secEl.querySelector('[data-doc="h"]')),
+        t:(bodyEl.innerText||'').trim(),
+        well:bodyEl.hasAttribute('data-well')
+      });
+    });
+    return v;
+  }
+  var saveT=null;
+  d.addEventListener('input',function(){
+    clearTimeout(saveT);
+    saveT=setTimeout(function(){hooks.saveView(harvest());},500);
   });
   var acts=el('div','doc-actions');
-  var c=el('button','btn-primary','Copy draft');c.type='button';
-  c.addEventListener('click',function(){copyText(serialized,c);});
+  var c=el('button','btn-primary','Copy draft (formatted)');c.type='button';
+  c.addEventListener('click',function(){var v=harvest();hooks.saveView(v);copyRich(richHtmlFromView(v,toolTitle),plainFromView(v),c);});
   var p=el('button','btn-ghost','Print draft');p.type='button';
-  p.addEventListener('click',function(){printText(serialized,title);});
-  acts.appendChild(c);acts.appendChild(p);
-  if(onReset){
-    var r=el('button','btn-ghost','Start a new draft');r.type='button';
-    r.addEventListener('click',onReset);
-    acts.appendChild(r);
-  }
+  p.addEventListener('click',function(){var v=harvest();hooks.saveView(v);printFormatted(v,toolTitle);});
+  var bpb=el('button','btn-yellow','Save to Backpack');bpb.type='button';
+  bpb.addEventListener('click',function(){var v=harvest();hooks.saveView(v);BP.save(tool,toolTitle,v);flash(bpb,'Saved \u2713');});
+  var r=el('button','btn-ghost','Start a new draft');r.type='button';
+  r.addEventListener('click',hooks.onReset);
+  acts.appendChild(c);acts.appendChild(p);acts.appendChild(bpb);acts.appendChild(r);
   d.appendChild(acts);
   host.appendChild(d);
 }
-function askPanel(view,tool,getArtifact){
+
+// ---- the backpack (ported from School Lens; browser-only, shared across tools) ----
+var BP=(function(){
+  var KEY='is2:backpack';
+  var items=[],openIds={};
+  function load(){
+    try{items=JSON.parse(localStorage.getItem(KEY))||[];}catch(e){items=[];}
+    render();
+  }
+  function persist(){
+    try{localStorage.setItem(KEY,JSON.stringify(items));}catch(e){}
+    render();
+  }
+  function save(tool,toolTitle,view){
+    items.unshift({id:'bp'+Date.now(),ts:Date.now(),tool:tool,toolTitle:toolTitle,view:view});
+    if(items.length>40){items.length=40;}
+    persist();
+  }
+  function render(){
+    var countEl=$('#bpCount'),empty=$('#bpEmpty'),box=$('#bpItems');
+    if(!countEl){return;}
+    countEl.textContent=items.length;
+    empty.style.display=items.length?'none':'block';
+    box.innerHTML='';
+    items.forEach(function(it,i){
+      var card=el('div','bp-item');
+      card.appendChild(el('div','bp-item-title',it.view.title||'Untitled draft'));
+      card.appendChild(el('div','bp-item-meta',(it.toolTitle||'Intelligence Suite')+' \u00b7 '+new Date(it.ts).toLocaleDateString()));
+      var acts=el('div','bp-item-actions');
+      var open=!!openIds[it.id];
+      var vb=el('button','bp-btn',open?'Hide \u25b4':'View \u25be');vb.type='button';
+      vb.addEventListener('click',function(){openIds[it.id]=!openIds[it.id];render();});
+      var cb=el('button','bp-btn','Copy (formatted)');cb.type='button';
+      cb.addEventListener('click',function(){copyRich(richHtmlFromView(it.view,it.toolTitle),plainFromView(it.view),cb);});
+      var rb=el('button','bp-btn danger','Remove');rb.type='button';
+      rb.addEventListener('click',function(){items.splice(i,1);persist();});
+      acts.appendChild(vb);acts.appendChild(cb);acts.appendChild(rb);
+      card.appendChild(acts);
+      var det=el('div','bp-detail'+(open?' show':''),plainFromView(it.view));
+      card.appendChild(det);
+      box.appendChild(card);
+    });
+  }
+  function copyAll(btn){
+    if(!items.length){flash(btn,'Backpack empty');return;}
+    var html='<div>',plain='';
+    items.forEach(function(it){
+      html+=richHtmlFromView(it.view,it.toolTitle);
+      plain+=plainFromView(it.view)+'\n============================\n\n';
+    });
+    html+='</div>';
+    copyRich(html,plain,btn);
+  }
+  function clearAll(){if(!items.length){return;}items=[];persist();}
+  function toggle(){$('#backpack').classList.toggle('open');}
+  return {load:load,save:save,copyAll:copyAll,clearAll:clearAll,toggle:toggle};
+})();
+
+function askPanel(view,tool,hooks){
   var wrap=el('div','ask');
-  var lab=el('span','mono-label','Ask about this draft');
+  wrap.appendChild(el('span','mono-label','Ask about this draft'));
+  var thread=el('div','ask-thread');
+  function renderThread(){
+    thread.innerHTML='';
+    hooks.getThread().forEach(function(x){
+      thread.appendChild(el('div','ask-q',x.q));
+      thread.appendChild(el('div','ask-a',x.a));
+    });
+    tools.style.display=hooks.getThread().length?'flex':'none';
+  }
   var row=el('div','row');
   var inp=el('input','field');inp.type='text';inp.placeholder='e.g. Which piece needs my judgment most?';
   var btn=el('button','btn-primary','Ask');btn.type='button';
-  var ans=el('div','answer');
-  var small=el('small',null,'Answers start from the draft above and report what is in it honestly. Ask how to adapt or extend it and you will get practical suggestions, marked as going beyond the draft. It is allowed to disagree with you. It never writes anything addressed to students. Nothing you type here is stored.');
-  btn.addEventListener('click',function(){
+  var pend=el('div','ask-a');pend.style.display='none';
+  var tools=el('div','ask-tools');
+  var clr=el('button','btn-ghost','Clear conversation');clr.type='button';
+  clr.addEventListener('click',function(){hooks.setThread([]);renderThread();});
+  tools.appendChild(clr);
+  var small=el('small',null,'This is a running conversation: follow-ups remember the exchange so far. Answers start from the draft above and say when they go beyond it. It is allowed to disagree with you. It never writes anything addressed to students. Nothing here is stored on any server; the conversation lives in this browser.');
+  function doAsk(){
     var q=inp.value.trim();
-    if(!q){ans.classList.add('active');ans.textContent='Type a question about the draft first.';return;}
-    btn.disabled=true;ans.classList.add('active');
-    var dots=0;ans.textContent='Thinking it over';
-    var tick=setInterval(function(){dots=(dots+1)%4;ans.textContent='Thinking it over'+Array(dots+1).join('.');},450);
-    api('ask',tool,{question:q,artifact:getArtifact()})
-      .then(function(d){clearInterval(tick);ans.textContent=d.answer;btn.disabled=false;})
-      .catch(function(ex){clearInterval(tick);ans.textContent=ex.friendly?ex.message:'That question could not be answered this time. Try again.';btn.disabled=false;});
-  });
+    if(!q){pend.style.display='block';pend.textContent='Type a question about the draft first.';setTimeout(function(){pend.style.display='none';},2500);return;}
+    btn.disabled=true;pend.style.display='block';
+    var dots=0;pend.textContent='Thinking it over';
+    var tick=setInterval(function(){dots=(dots+1)%4;pend.textContent='Thinking it over'+Array(dots+1).join('.');},450);
+    api('ask',tool,{question:q,artifact:hooks.getArtifact(),history:hooks.getThread().slice(-4)})
+      .then(function(d){
+        clearInterval(tick);pend.style.display='none';btn.disabled=false;
+        var th=hooks.getThread();th.push({q:q,a:d.answer});hooks.setThread(th);
+        inp.value='';renderThread();
+      })
+      .catch(function(ex){
+        clearInterval(tick);btn.disabled=false;
+        pend.style.display='block';
+        pend.textContent=ex.friendly?ex.message:'That question could not be answered this time. Try again.';
+      });
+  }
+  btn.addEventListener('click',doAsk);
+  inp.addEventListener('keydown',function(e){if(e.key==='Enter'){doAsk();}});
   row.appendChild(inp);row.appendChild(btn);
-  wrap.appendChild(lab);wrap.appendChild(row);wrap.appendChild(ans);wrap.appendChild(small);
+  wrap.appendChild(thread);wrap.appendChild(row);wrap.appendChild(pend);
+  wrap.appendChild(tools);wrap.appendChild(small);
+  renderThread();
   return wrap;
 }
 
-// ================== ROUTER ==================
+// ================== ROUTER ==================// ================== ROUTER ==================
 function show(view){
   document.querySelectorAll('.view').forEach(function(v){v.classList.remove('active');});
   $('#view-'+view).classList.add('active');
@@ -489,8 +743,13 @@ var overlay=$('#archOverlay');
 $('#archBtn').addEventListener('click',function(){overlay.classList.add('active');});
 $('#archClose').addEventListener('click',function(){overlay.classList.remove('active');});
 overlay.addEventListener('click',function(e){if(e.target===overlay){overlay.classList.remove('active');}});
-document.addEventListener('keydown',function(e){if(e.key==='Escape'){overlay.classList.remove('active');}});
+document.addEventListener('keydown',function(e){if(e.key==='Escape'){overlay.classList.remove('active');$('#backpack').classList.remove('open');}});
 if(API_URL){ $('#ribbon').textContent='Connected. Drafts are generated live; inputs are processed, never stored.'; }
+$('#bpToggle').addEventListener('click',BP.toggle);
+$('#bpClose').addEventListener('click',BP.toggle);
+$('#bpCopyAll').addEventListener('click',function(){BP.copyAll(this);});
+$('#bpClear').addEventListener('click',BP.clearAll);
+BP.load();
 
 // ================== TOOL SHELL BUILDER ==================
 function buildShell(view,def){
@@ -663,7 +922,7 @@ var FE={}; // front-end tool registry: FE[tool] = {open}
     go.addEventListener('click',function(){
       runLoader(sh.view,['Reading your three doors','Writing the setup for each','Attaching the teacher moves','Anchoring the assessment'],function(){
         return api('commit',TOOL,{data:st.intake,selections:st.sel}).then(function(d){
-          st.artifact=d;st.stage='artifact';save();
+          st.artifact=d;st.view=null;st.ask=[];st.stage='artifact';save();
           return {done:renderArtifact};
         });
       });
@@ -701,8 +960,16 @@ var FE={}; // front-end tool registry: FE[tool] = {open}
     sections.push({h:'Assessment anchor',t:a.assessmentAnchor});
     sections.push({h:'Timing',t:a.timing});
     sections.push({h:'Where your judgment is needed',t:a.adaptationNotes});
-    docRender(box,a.menuTitle,a.objectiveSummary,sections,serialize(a),function(){clearState(TOOL);st=fresh();renderIntake();});
-    box.appendChild(askPanel(sh.view,TOOL,function(){return st.artifact;}));
+    var baseView={title:a.menuTitle,sub:a.objectiveSummary,sections:sections};
+    docRender(box,TOOL,'UDL Architect',st.view||baseView,{
+      onReset:function(){clearState(TOOL);st=fresh();renderIntake();},
+      saveView:function(v){st.view=v;save();}
+    });
+    box.appendChild(askPanel(sh.view,TOOL,{
+      getArtifact:function(){return st.view?{editedDraft:plainFromView(st.view)}:st.artifact;},
+      getThread:function(){st.ask=st.ask||[];return st.ask;},
+      setThread:function(t){st.ask=t;save();}
+    }));
   }
 
   function save(){saveState(TOOL,st);}
@@ -833,7 +1100,7 @@ var FE={}; // front-end tool registry: FE[tool] = {open}
       var chosen=nodes.filter(function(n){return st.selIds.indexOf(n.id)>=0;}).map(function(n){return n.label;});
       runLoader(sh.view,['Reading the chosen chase','Laying out three phases','Writing the teacher moves','Ending on an open question'],function(){
         return api('commit',TOOL,{data:st.intake,selections:{nodes:chosen}}).then(function(d){
-          st.artifact=d;st.stage='artifact';save();
+          st.artifact=d;st.view=null;st.ask=[];st.stage='artifact';save();
           return {done:renderArtifact};
         });
       });
@@ -868,8 +1135,16 @@ var FE={}; // front-end tool registry: FE[tool] = {open}
     sections.push({h:'Source guidance',t:a.sourceGuidance});
     sections.push({h:'Share-out',t:a.shareOut});
     sections.push({h:'Open question prompt (adapt before use)',t:a.openQuestionPrompt,well:true});
-    docRender(box,a.planTitle,a.refinedQuestion,sections,serialize(a),function(){clearState(TOOL);st=fresh();renderIntake();});
-    box.appendChild(askPanel(sh.view,TOOL,function(){return st.artifact;}));
+    var baseView={title:a.planTitle,sub:a.refinedQuestion,sections:sections};
+    docRender(box,TOOL,'Wonder Web',st.view||baseView,{
+      onReset:function(){clearState(TOOL);st=fresh();renderIntake();},
+      saveView:function(v){st.view=v;save();}
+    });
+    box.appendChild(askPanel(sh.view,TOOL,{
+      getArtifact:function(){return st.view?{editedDraft:plainFromView(st.view)}:st.artifact;},
+      getThread:function(){st.ask=st.ask||[];return st.ask;},
+      setThread:function(t){st.ask=t;save();}
+    }));
   }
   function save(){saveState(TOOL,st);}
   FE[TOOL]={open:open};
@@ -961,7 +1236,7 @@ var FE={}; // front-end tool registry: FE[tool] = {open}
     go.addEventListener('click',function(){
       runLoader(sh.view,['Standing on your bridge','Giving both subjects real work','Writing the synthesis task'],function(){
         return api('commit',TOOL,{data:st.intake,selections:st.sel}).then(function(d){
-          st.artifact=d;st.stage='artifact';save();
+          st.artifact=d;st.view=null;st.ask=[];st.stage='artifact';save();
           return {done:renderArtifact};
         });
       });
@@ -991,8 +1266,16 @@ var FE={}; // front-end tool registry: FE[tool] = {open}
       {h:'Assessment',t:a.assessment},
       {h:'Materials and timing',t:a.materials+'\n'+a.timing}
     ];
-    docRender(box,a.lessonTitle,a.objective,sections,serialize(a),function(){clearState(TOOL);st=fresh();renderIntake();});
-    box.appendChild(askPanel(sh.view,TOOL,function(){return st.artifact;}));
+    var baseView={title:a.lessonTitle,sub:a.objective,sections:sections};
+    docRender(box,TOOL,'CrossLink',st.view||baseView,{
+      onReset:function(){clearState(TOOL);st=fresh();renderIntake();},
+      saveView:function(v){st.view=v;save();}
+    });
+    box.appendChild(askPanel(sh.view,TOOL,{
+      getArtifact:function(){return st.view?{editedDraft:plainFromView(st.view)}:st.artifact;},
+      getThread:function(){st.ask=st.ask||[];return st.ask;},
+      setThread:function(t){st.ask=t;save();}
+    }));
   }
   function save(){saveState(TOOL,st);}
   FE[TOOL]={open:open};
@@ -1088,7 +1371,7 @@ var FE={}; // front-end tool registry: FE[tool] = {open}
       var chosen=st.options.applications.filter(function(a){return st.selIds.indexOf(a.id)>=0;}).map(function(a){return a.title;});
       runLoader(sh.view,['Standing inside your choices','Keeping the full demand of the standard','Drafting the partner outreach'],function(){
         return api('commit',TOOL,{data:st.intake,selections:{applications:chosen}}).then(function(d){
-          st.artifact=d;st.stage='artifact';save();
+          st.artifact=d;st.view=null;st.ask=[];st.stage='artifact';save();
           return {done:renderArtifact};
         });
       });
@@ -1124,8 +1407,16 @@ var FE={}; // front-end tool registry: FE[tool] = {open}
     sections.push({h:'Partner outreach \u00b7 '+a.partnerOutreach.who+' (adapt before sending)',t:a.partnerOutreach.draftNote,well:true});
     sections.push({h:'Assessment',t:a.assessment});
     sections.push({h:'Timing',t:a.timing});
-    docRender(box,a.unitTitle,a.standard,sections,serialize(a),function(){clearState(TOOL);st=fresh();renderIntake();});
-    box.appendChild(askPanel(sh.view,TOOL,function(){return st.artifact;}));
+    var baseView={title:a.unitTitle,sub:a.standard,sections:sections};
+    docRender(box,TOOL,'REAL Connections',st.view||baseView,{
+      onReset:function(){clearState(TOOL);st=fresh();renderIntake();},
+      saveView:function(v){st.view=v;save();}
+    });
+    box.appendChild(askPanel(sh.view,TOOL,{
+      getArtifact:function(){return st.view?{editedDraft:plainFromView(st.view)}:st.artifact;},
+      getThread:function(){st.ask=st.ask||[];return st.ask;},
+      setThread:function(t){st.ask=t;save();}
+    }));
   }
   function save(){saveState(TOOL,st);}
   FE[TOOL]={open:open};
